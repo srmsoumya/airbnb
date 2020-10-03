@@ -249,9 +249,10 @@ def create_driver(driver_path):
     return driver
 
 
-def process(driver, url):
+def process(driver, target):
     """Combine scraped information for the room like room-details, images & reviews."""
-    room = {}
+    room = {"target": target}
+    url = f"https://www.airbnb.co.in/rooms/{target}"
 
     room.update(extract_room_details(driver, url))
     room.update(extract_images(driver, f"{url}/photos/"))
@@ -278,11 +279,13 @@ def main():
         target = property["target"]
         if target not in cached:  # Check if it is not already scraped
             print(f"Target: {target}", end=" ")
-            room = process(driver, f"https://www.airbnb.co.in/rooms/{target}")
+            room = process(driver, target)
             db.insert(room)
             print("Waiting...", end=" ")
             time.sleep(2)
             print("Done.")
+
+    driver.close()
 
 
 if __name__ == "__main__":
